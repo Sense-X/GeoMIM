@@ -27,7 +27,7 @@ We have achieved strong performance on the nuScenes benchmark with GeoMIM. Here 
 | Config | mAP | NDS | Download |	
 | ------ | --- | --- | ----- |
 | [bevdet-swinb-4d-256x704-cbgs](bevdet/configs/bevdet_geomim/bevdet-swinb-4d-256x704-cbgs.py) | 33.98 | 47.19 | [Model](https://drive.google.com/file/d/1sNn6kdgdIUQwUZQvywvtszEHTrStsDFQ/view?usp=sharing) |
-| [bevdet-swinb-4d-256x704-cbgs-geomim](bevdet/configs/bevdet_geomim/bevdet-swinb-4d-256x704-cbgs-geomim.py) | 42.25 | 53.1 | [ckpt](https://drive.google.com/file/d/1xJ77En6Aa_gYDu1IEAtx_t8gdS3MCici/view?usp=sharing) |
+| [bevdet-swinb-4d-256x704-cbgs-geomim](bevdet/configs/bevdet_geomim/bevdet-swinb-4d-256x704-cbgs-geomim.py) | 42.25 | 53.1 | [Model](https://drive.google.com/file/d/1xJ77En6Aa_gYDu1IEAtx_t8gdS3MCici/view?usp=sharing) |
 | [bevdet-swinb-4d-stereo-256x704-cbgs-geomim](bevdet/configs/bevdet_geomim/bevdet-swinb-4d-stereo-256x704-cbgs-geomim.py) | 45.33 | 55.1 | [Model](https://drive.google.com/file/d/1v-YXOJ-VLuCS-WrnJHfmA_YKgWshjMe2/view?usp=sharing) |
 | [bevdet-swinb-4d-stereo-512x1408-cbgs](bevdet/configs/bevdet/bevdet-stbase-4d-stereo-512x1408-cbgs.py) | 47.2 | 57.6 | [Model](https://pan.baidu.com/s/1237QyV18zvRJ1pU3YzRItw?pwd=npe1) (#) |
 | [bevdet-swinb-4d-stereo-512x1408-cbgs-geomim](bevdet/configs/bevdet_geomim/bevdet-swinb-4d-stereo-512x1408-cbgs-geomim.py) | 52.04 | 60.92 | [Model](https://drive.google.com/file/d/1AZTjIrO0G1huecHx5PzJNgReVGCo1JdC/view?usp=sharing) |

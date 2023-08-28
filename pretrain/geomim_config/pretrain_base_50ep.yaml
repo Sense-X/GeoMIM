@@ -1,0 +1,1094 @@
+checkpoint_config:
+  interval: 1
+  max_keep_ckpts: 1
+cudnn_benchmark: false
+data:
+  samples_per_gpu: 2
+  test:
+    ann_file: data/nuscenes/nuscenes_infos_val.pkl
+    box_type_3d: LiDAR
+    dataset_root: data/nuscenes/
+    map_classes:
+    - drivable_area
+    - ped_crossing
+    - walkway
+    - stop_line
+    - carpark_area
+    - divider
+    modality:
+      use_camera: true
+      use_external: false
+      use_lidar: true
+      use_map: false
+      use_radar: false
+    object_classes:
+    - car
+    - truck
+    - construction_vehicle
+    - bus
+    - trailer
+    - barrier
+    - motorcycle
+    - bicycle
+    - pedestrian
+    - traffic_cone
+    pipeline:
+    - to_float32: true
+      type: LoadMultiViewImageFromFiles
+    - coord_type: LIDAR
+      load_augmented: null
+      load_dim: 5
+      reduce_beams: 32
+      type: LoadPointsFromFile
+      use_dim: 5
+    - load_augmented: null
+      load_dim: 5
+      pad_empty_sweeps: true
+      reduce_beams: 32
+      remove_close: true
+      sweeps_num: 9
+      type: LoadPointsFromMultiSweeps
+      use_dim: 5
+    - type: LoadAnnotations3D
+      with_attr_label: false
+      with_bbox_3d: true
+      with_label_3d: true
+    - bot_pct_lim:
+      - 0.0
+      - 0.0
+      final_dim:
+      - 256
+      - 704
+      is_train: false
+      rand_flip: false
+      resize_lim:
+      - 0.48
+      - 0.48
+      rot_lim:
+      - 0.0
+      - 0.0
+      type: ImageAug3D
+    - is_train: false
+      resize_lim:
+      - 1.0
+      - 1.0
+      rot_lim:
+      - 0.0
+      - 0.0
+      trans_lim: 0.0
+      type: GlobalRotScaleTrans
+    - classes:
+      - drivable_area
+      - ped_crossing
+      - walkway
+      - stop_line
+      - carpark_area
+      - divider
+      dataset_root: data/nuscenes/
+      type: LoadBEVSegmentation
+      xbound:
+      - -50.0
+      - 50.0
+      - 0.5
+      ybound:
+      - -50.0
+      - 50.0
+      - 0.5
+    - point_cloud_range:
+      - -54.0
+      - -54.0
+      - -5.0
+      - 54.0
+      - 54.0
+      - 3.0
+      type: PointsRangeFilter
+    - mean:
+      - 0.485
+      - 0.456
+      - 0.406
+      std:
+      - 0.229
+      - 0.224
+      - 0.225
+      type: ImageNormalize
+    - classes:
+      - car
+      - truck
+      - construction_vehicle
+      - bus
+      - trailer
+      - barrier
+      - motorcycle
+      - bicycle
+      - pedestrian
+      - traffic_cone
+      type: DefaultFormatBundle3D
+    - keys:
+      - img
+      - points
+      - gt_bboxes_3d
+      - gt_labels_3d
+      - gt_masks_bev
+      meta_keys:
+      - camera_intrinsics
+      - camera2ego
+      - lidar2ego
+      - lidar2camera
+      - camera2lidar
+      - lidar2image
+      - img_aug_matrix
+      - lidar_aug_matrix
+      type: Collect3D
+    test_mode: true
+    type: NuScenesDataset
+  train:
+    dataset:
+      ann_file: data/nuscenes/nuscenes_infos_train.pkl
+      box_type_3d: LiDAR
+      dataset_root: data/nuscenes/
+      map_classes:
+      - drivable_area
+      - ped_crossing
+      - walkway
+      - stop_line
+      - carpark_area
+      - divider
+      modality:
+        use_camera: true
+        use_external: false
+        use_lidar: true
+        use_map: false
+        use_radar: false
+      object_classes:
+      - car
+      - truck
+      - construction_vehicle
+      - bus
+      - trailer
+      - barrier
+      - motorcycle
+      - bicycle
+      - pedestrian
+      - traffic_cone
+      pipeline:
+      - to_float32: true
+        type: LoadMultiViewImageFromFiles
+      - coord_type: LIDAR
+        load_augmented: null
+        load_dim: 5
+        reduce_beams: 32
+        type: LoadPointsFromFile
+        use_dim: 5
+      - load_augmented: null
+        load_dim: 5
+        pad_empty_sweeps: true
+        reduce_beams: 32
+        remove_close: true
+        sweeps_num: 9
+        type: LoadPointsFromMultiSweeps
+        use_dim: 5
+      - type: LoadAnnotations3D
+        with_attr_label: false
+        with_bbox_3d: true
+        with_label_3d: true
+      - db_sampler:
+          classes:
+          - car
+          - truck
+          - construction_vehicle
+          - bus
+          - trailer
+          - barrier
+          - motorcycle
+          - bicycle
+          - pedestrian
+          - traffic_cone
+          dataset_root: data/nuscenes/
+          info_path: data/nuscenes/nuscenes_dbinfos_train.pkl
+          points_loader:
+            coord_type: LIDAR
+            load_dim: 5
+            reduce_beams: 32
+            type: LoadPointsFromFile
+            use_dim: 5
+          prepare:
+            filter_by_difficulty:
+            - -1
+            filter_by_min_points:
+              barrier: 5
+              bicycle: 5
+              bus: 5
+              car: 5
+              construction_vehicle: 5
+              motorcycle: 5
+              pedestrian: 5
+              traffic_cone: 5
+              trailer: 5
+              truck: 5
+          rate: 1.0
+          sample_groups:
+            barrier: 2
+            bicycle: 6
+            bus: 4
+            car: 2
+            construction_vehicle: 7
+            motorcycle: 6
+            pedestrian: 2
+            traffic_cone: 2
+            trailer: 6
+            truck: 3
+        stop_epoch: -1
+        type: ObjectPaste
+      - bot_pct_lim:
+        - 0.0
+        - 0.0
+        final_dim:
+        - 256
+        - 704
+        is_train: true
+        rand_flip: true
+        resize_lim:
+        - 0.38
+        - 0.55
+        rot_lim:
+        - -5.4
+        - 5.4
+        type: ImageAug3D
+      - is_train: false
+        resize_lim:
+        - 1.0
+        - 1.0
+        rot_lim:
+        - 0.0
+        - 0.0
+        trans_lim: 0.0
+        type: GlobalRotScaleTrans
+      - classes:
+        - drivable_area
+        - ped_crossing
+        - walkway
+        - stop_line
+        - carpark_area
+        - divider
+        dataset_root: data/nuscenes/
+        type: LoadBEVSegmentation
+        xbound:
+        - -50.0
+        - 50.0
+        - 0.5
+        ybound:
+        - -50.0
+        - 50.0
+        - 0.5
+      - type: RandomFlip3D
+      - point_cloud_range:
+        - -54.0
+        - -54.0
+        - -5.0
+        - 54.0
+        - 54.0
+        - 3.0
+        type: PointsRangeFilter
+      - point_cloud_range:
+        - -54.0
+        - -54.0
+        - -5.0
+        - 54.0
+        - 54.0
+        - 3.0
+        type: ObjectRangeFilter
+      - classes:
+        - car
+        - truck
+        - construction_vehicle
+        - bus
+        - trailer
+        - barrier
+        - motorcycle
+        - bicycle
+        - pedestrian
+        - traffic_cone
+        type: ObjectNameFilter
+      - mean:
+        - 0.485
+        - 0.456
+        - 0.406
+        std:
+        - 0.229
+        - 0.224
+        - 0.225
+        type: ImageNormalize
+      - fixed_prob: true
+        max_epoch: 50
+        mode: 1
+        offset: false
+        prob: 0.0
+        ratio: 0.5
+        rotate: 1
+        type: GridMask
+        use_h: true
+        use_w: true
+      - classes:
+        - car
+        - truck
+        - construction_vehicle
+        - bus
+        - trailer
+        - barrier
+        - motorcycle
+        - bicycle
+        - pedestrian
+        - traffic_cone
+        type: DefaultFormatBundle3D
+      - keys:
+        - img
+        - points
+        - gt_bboxes_3d
+        - gt_labels_3d
+        - gt_masks_bev
+        meta_keys:
+        - camera_intrinsics
+        - camera2ego
+        - lidar2ego
+        - lidar2camera
+        - camera2lidar
+        - lidar2image
+        - img_aug_matrix
+        - lidar_aug_matrix
+        type: Collect3D
+      test_mode: false
+      type: NuScenesDataset
+      use_valid_flag: true
+    type: CBGSDataset
+  val:
+    ann_file: data/nuscenes/nuscenes_infos_val.pkl
+    box_type_3d: LiDAR
+    dataset_root: data/nuscenes/
+    map_classes:
+    - drivable_area
+    - ped_crossing
+    - walkway
+    - stop_line
+    - carpark_area
+    - divider
+    modality:
+      use_camera: true
+      use_external: false
+      use_lidar: true
+      use_map: false
+      use_radar: false
+    object_classes:
+    - car
+    - truck
+    - construction_vehicle
+    - bus
+    - trailer
+    - barrier
+    - motorcycle
+    - bicycle
+    - pedestrian
+    - traffic_cone
+    pipeline:
+    - to_float32: true
+      type: LoadMultiViewImageFromFiles
+    - coord_type: LIDAR
+      load_augmented: null
+      load_dim: 5
+      reduce_beams: 32
+      type: LoadPointsFromFile
+      use_dim: 5
+    - load_augmented: null
+      load_dim: 5
+      pad_empty_sweeps: true
+      reduce_beams: 32
+      remove_close: true
+      sweeps_num: 9
+      type: LoadPointsFromMultiSweeps
+      use_dim: 5
+    - type: LoadAnnotations3D
+      with_attr_label: false
+      with_bbox_3d: true
+      with_label_3d: true
+    - bot_pct_lim:
+      - 0.0
+      - 0.0
+      final_dim:
+      - 256
+      - 704
+      is_train: false
+      rand_flip: false
+      resize_lim:
+      - 0.48
+      - 0.48
+      rot_lim:
+      - 0.0
+      - 0.0
+      type: ImageAug3D
+    - is_train: false
+      resize_lim:
+      - 1.0
+      - 1.0
+      rot_lim:
+      - 0.0
+      - 0.0
+      trans_lim: 0.0
+      type: GlobalRotScaleTrans
+    - classes:
+      - drivable_area
+      - ped_crossing
+      - walkway
+      - stop_line
+      - carpark_area
+      - divider
+      dataset_root: data/nuscenes/
+      type: LoadBEVSegmentation
+      xbound:
+      - -50.0
+      - 50.0
+      - 0.5
+      ybound:
+      - -50.0
+      - 50.0
+      - 0.5
+    - point_cloud_range:
+      - -54.0
+      - -54.0
+      - -5.0
+      - 54.0
+      - 54.0
+      - 3.0
+      type: PointsRangeFilter
+    - mean:
+      - 0.485
+      - 0.456
+      - 0.406
+      std:
+      - 0.229
+      - 0.224
+      - 0.225
+      type: ImageNormalize
+    - classes:
+      - car
+      - truck
+      - construction_vehicle
+      - bus
+      - trailer
+      - barrier
+      - motorcycle
+      - bicycle
+      - pedestrian
+      - traffic_cone
+      type: DefaultFormatBundle3D
+    - keys:
+      - img
+      - points
+      - gt_bboxes_3d
+      - gt_labels_3d
+      - gt_masks_bev
+      meta_keys:
+      - camera_intrinsics
+      - camera2ego
+      - lidar2ego
+      - lidar2camera
+      - camera2lidar
+      - lidar2image
+      - img_aug_matrix
+      - lidar_aug_matrix
+      type: Collect3D
+    test_mode: false
+    type: NuScenesDataset
+  workers_per_gpu: 2
+dataset_root: data/nuscenes/
+dataset_type: NuScenesDataset
+deterministic: false
+evaluation:
+  interval: 1000
+  pipeline:
+  - to_float32: true
+    type: LoadMultiViewImageFromFiles
+  - coord_type: LIDAR
+    load_augmented: null
+    load_dim: 5
+    reduce_beams: 32
+    type: LoadPointsFromFile
+    use_dim: 5
+  - load_augmented: null
+    load_dim: 5
+    pad_empty_sweeps: true
+    reduce_beams: 32
+    remove_close: true
+    sweeps_num: 9
+    type: LoadPointsFromMultiSweeps
+    use_dim: 5
+  - type: LoadAnnotations3D
+    with_attr_label: false
+    with_bbox_3d: true
+    with_label_3d: true
+  - bot_pct_lim:
+    - 0.0
+    - 0.0
+    final_dim:
+    - 256
+    - 704
+    is_train: false
+    rand_flip: false
+    resize_lim:
+    - 0.48
+    - 0.48
+    rot_lim:
+    - 0.0
+    - 0.0
+    type: ImageAug3D
+  - is_train: false
+    resize_lim:
+    - 1.0
+    - 1.0
+    rot_lim:
+    - 0.0
+    - 0.0
+    trans_lim: 0.0
+    type: GlobalRotScaleTrans
+  - classes:
+    - drivable_area
+    - ped_crossing
+    - walkway
+    - stop_line
+    - carpark_area
+    - divider
+    dataset_root: data/nuscenes/
+    type: LoadBEVSegmentation
+    xbound:
+    - -50.0
+    - 50.0
+    - 0.5
+    ybound:
+    - -50.0
+    - 50.0
+    - 0.5
+  - point_cloud_range:
+    - -54.0
+    - -54.0
+    - -5.0
+    - 54.0
+    - 54.0
+    - 3.0
+    type: PointsRangeFilter
+  - mean:
+    - 0.485
+    - 0.456
+    - 0.406
+    std:
+    - 0.229
+    - 0.224
+    - 0.225
+    type: ImageNormalize
+  - classes:
+    - car
+    - truck
+    - construction_vehicle
+    - bus
+    - trailer
+    - barrier
+    - motorcycle
+    - bicycle
+    - pedestrian
+    - traffic_cone
+    type: DefaultFormatBundle3D
+  - keys:
+    - img
+    - points
+    - gt_bboxes_3d
+    - gt_labels_3d
+    - gt_masks_bev
+    meta_keys:
+    - camera_intrinsics
+    - camera2ego
+    - lidar2ego
+    - lidar2camera
+    - camera2lidar
+    - lidar2image
+    - img_aug_matrix
+    - lidar_aug_matrix
+    type: Collect3D
+fp16: null
+gt_paste_stop_epoch: -1
+image_size:
+- 256
+- 704
+input_modality:
+  use_camera: true
+  use_external: false
+  use_lidar: true
+  use_map: false
+  use_radar: false
+load_augmented: null
+load_dim: 5
+resume_from: null
+load_from: /path/to/lidar-only-det.pth
+log_config:
+  hooks:
+  - type: TextLoggerHook
+  - type: TensorboardLoggerHook
+  interval: 50
+lr_config:
+  min_lr_ratio: 0.001
+  policy: CosineAnnealing
+  warmup: linear
+  warmup_iters: 500
+  warmup_ratio: 0.33333333
+map_classes:
+- drivable_area
+- ped_crossing
+- walkway
+- stop_line
+- carpark_area
+- divider
+max_epochs: 50
+model:
+  encoders:
+    camera:
+      backbone:
+        attn_drop_rate: 0.0
+        convert_weights: true
+        depths:
+        - 2
+        - 2
+        - 18
+        - 2
+        drop_path_rate: 0.0
+        drop_rate: 0.0
+        embed_dims: 128
+        init_cfg:
+          checkpoint: /path/to/mixmae_base_600ep.pth
+          type: Pretrained
+        mlp_ratio: 4
+        num_heads:
+        - 4
+        - 8
+        - 16
+        - 32
+        out_indices:
+        - 2
+        - 3
+        patch_norm: true
+        qk_scale: null
+        qkv_bias: true
+        type: SwinTransformerBEV
+        with_cp: false
+      vtransform:
+        ret_depth: true
+        stride: 16
+        dbound:
+        - 1.0
+        - 60.0
+        - 0.5
+        downsample: 2
+        feature_size:
+        - 16
+        - 44
+        image_size:
+        - 256
+        - 704
+        in_channels: 512
+        out_channels: 80
+        type: DepthLSSTransformGT
+        xbound:
+        - -54.0
+        - 54.0
+        - 0.3
+        ybound:
+        - -54.0
+        - 54.0
+        - 0.3
+        zbound:
+        - -10.0
+        - 10.0
+        - 20.0
+    lidar:
+      backbone:
+        block_type: basicblock
+        encoder_channels:
+        - - 16
+          - 16
+          - 32
+        - - 32
+          - 32
+          - 64
+        - - 64
+          - 64
+          - 128
+        - - 128
+          - 128
+        encoder_paddings:
+        - - 0
+          - 0
+          - 1
+        - - 0
+          - 0
+          - 1
+        - - 0
+          - 0
+          - - 1
+            - 1
+            - 0
+        - - 0
+          - 0
+        in_channels: 5
+        order:
+        - conv
+        - norm
+        - act
+        output_channels: 128
+        sparse_shape:
+        - 1440
+        - 1440
+        - 41
+        type: SparseEncoder
+      voxelize:
+        max_num_points: 10
+        max_voxels:
+        - 120000
+        - 160000
+        point_cloud_range:
+        - -54.0
+        - -54.0
+        - -5.0
+        - 54.0
+        - 54.0
+        - 3.0
+        voxel_size:
+        - 0.075
+        - 0.075
+        - 0.2
+  type: BEVFusionGeoMIM
+momentum_config:
+  policy: cyclic
+object_classes:
+- car
+- truck
+- construction_vehicle
+- bus
+- trailer
+- barrier
+- motorcycle
+- bicycle
+- pedestrian
+- traffic_cone
+optimizer:
+  lr: 0.0002
+  type: AdamW
+  weight_decay: 0.01
+optimizer_config:
+  grad_clip:
+    max_norm: 35
+    norm_type: 2
+point_cloud_range:
+- -54.0
+- -54.0
+- -5.0
+- 54.0
+- 54.0
+- 3.0
+reduce_beams: 32
+run_dir: runs/pretrain_base
+runner:
+  max_epochs: 50
+  type: CustomEpochBasedRunner
+seed: 0
+test_pipeline:
+- to_float32: true
+  type: LoadMultiViewImageFromFiles
+- coord_type: LIDAR
+  load_augmented: null
+  load_dim: 5
+  reduce_beams: 32
+  type: LoadPointsFromFile
+  use_dim: 5
+- load_augmented: null
+  load_dim: 5
+  pad_empty_sweeps: true
+  reduce_beams: 32
+  remove_close: true
+  sweeps_num: 9
+  type: LoadPointsFromMultiSweeps
+  use_dim: 5
+- type: LoadAnnotations3D
+  with_attr_label: false
+  with_bbox_3d: true
+  with_label_3d: true
+- bot_pct_lim:
+  - 0.0
+  - 0.0
+  final_dim:
+  - 256
+  - 704
+  is_train: false
+  rand_flip: false
+  resize_lim:
+  - 0.48
+  - 0.48
+  rot_lim:
+  - 0.0
+  - 0.0
+  type: ImageAug3D
+- is_train: false
+  resize_lim:
+  - 1.0
+  - 1.0
+  rot_lim:
+  - 0.0
+  - 0.0
+  trans_lim: 0.0
+  type: GlobalRotScaleTrans
+- classes:
+  - drivable_area
+  - ped_crossing
+  - walkway
+  - stop_line
+  - carpark_area
+  - divider
+  dataset_root: data/nuscenes/
+  type: LoadBEVSegmentation
+  xbound:
+  - -50.0
+  - 50.0
+  - 0.5
+  ybound:
+  - -50.0
+  - 50.0
+  - 0.5
+- point_cloud_range:
+  - -54.0
+  - -54.0
+  - -5.0
+  - 54.0
+  - 54.0
+  - 3.0
+  type: PointsRangeFilter
+- mean:
+  - 0.485
+  - 0.456
+  - 0.406
+  std:
+  - 0.229
+  - 0.224
+  - 0.225
+  type: ImageNormalize
+- classes:
+  - car
+  - truck
+  - construction_vehicle
+  - bus
+  - trailer
+  - barrier
+  - motorcycle
+  - bicycle
+  - pedestrian
+  - traffic_cone
+  type: DefaultFormatBundle3D
+- keys:
+  - img
+  - points
+  - gt_bboxes_3d
+  - gt_labels_3d
+  - gt_masks_bev
+  meta_keys:
+  - camera_intrinsics
+  - camera2ego
+  - lidar2ego
+  - lidar2camera
+  - camera2lidar
+  - lidar2image
+  - img_aug_matrix
+  - lidar_aug_matrix
+  type: Collect3D
+train_pipeline:
+- to_float32: true
+  type: LoadMultiViewImageFromFiles
+- coord_type: LIDAR
+  load_augmented: null
+  load_dim: 5
+  reduce_beams: 32
+  type: LoadPointsFromFile
+  use_dim: 5
+- load_augmented: null
+  load_dim: 5
+  pad_empty_sweeps: true
+  reduce_beams: 32
+  remove_close: true
+  sweeps_num: 9
+  type: LoadPointsFromMultiSweeps
+  use_dim: 5
+- type: LoadAnnotations3D
+  with_attr_label: false
+  with_bbox_3d: true
+  with_label_3d: true
+- db_sampler:
+    classes:
+    - car
+    - truck
+    - construction_vehicle
+    - bus
+    - trailer
+    - barrier
+    - motorcycle
+    - bicycle
+    - pedestrian
+    - traffic_cone
+    dataset_root: data/nuscenes/
+    info_path: data/nuscenes/nuscenes_dbinfos_train.pkl
+    points_loader:
+      coord_type: LIDAR
+      load_dim: 5
+      reduce_beams: 32
+      type: LoadPointsFromFile
+      use_dim: 5
+    prepare:
+      filter_by_difficulty:
+      - -1
+      filter_by_min_points:
+        barrier: 5
+        bicycle: 5
+        bus: 5
+        car: 5
+        construction_vehicle: 5
+        motorcycle: 5
+        pedestrian: 5
+        traffic_cone: 5
+        trailer: 5
+        truck: 5
+    rate: 1.0
+    sample_groups:
+      barrier: 2
+      bicycle: 6
+      bus: 4
+      car: 2
+      construction_vehicle: 7
+      motorcycle: 6
+      pedestrian: 2
+      traffic_cone: 2
+      trailer: 6
+      truck: 3
+  stop_epoch: -1
+  type: ObjectPaste
+- bot_pct_lim:
+  - 0.0
+  - 0.0
+  final_dim:
+  - 256
+  - 704
+  is_train: true
+  rand_flip: true
+  resize_lim:
+  - 0.38
+  - 0.55
+  rot_lim:
+  - -5.4
+  - 5.4
+  type: ImageAug3D
+- is_train: false
+  resize_lim:
+  - 1.0
+  - 1.0
+  rot_lim:
+  - 0.0
+  - 0.0
+  trans_lim: 0.0
+  type: GlobalRotScaleTrans
+- classes:
+  - drivable_area
+  - ped_crossing
+  - walkway
+  - stop_line
+  - carpark_area
+  - divider
+  dataset_root: data/nuscenes/
+  type: LoadBEVSegmentation
+  xbound:
+  - -50.0
+  - 50.0
+  - 0.5
+  ybound:
+  - -50.0
+  - 50.0
+  - 0.5
+- point_cloud_range:
+  - -54.0
+  - -54.0
+  - -5.0
+  - 54.0
+  - 54.0
+  - 3.0
+  type: PointsRangeFilter
+- point_cloud_range:
+  - -54.0
+  - -54.0
+  - -5.0
+  - 54.0
+  - 54.0
+  - 3.0
+  type: ObjectRangeFilter
+- classes:
+  - car
+  - truck
+  - construction_vehicle
+  - bus
+  - trailer
+  - barrier
+  - motorcycle
+  - bicycle
+  - pedestrian
+  - traffic_cone
+  type: ObjectNameFilter
+- mean:
+  - 0.485
+  - 0.456
+  - 0.406
+  std:
+  - 0.229
+  - 0.224
+  - 0.225
+  type: ImageNormalize
+- fixed_prob: true
+  max_epoch: 50
+  mode: 1
+  offset: false
+  prob: 0.0
+  ratio: 0.5
+  rotate: 1
+  type: GridMask
+  use_h: true
+  use_w: true
+- classes:
+  - car
+  - truck
+  - construction_vehicle
+  - bus
+  - trailer
+  - barrier
+  - motorcycle
+  - bicycle
+  - pedestrian
+  - traffic_cone
+  type: DefaultFormatBundle3D
+- keys:
+  - img
+  - points
+  - gt_bboxes_3d
+  - gt_labels_3d
+  - gt_masks_bev
+  meta_keys:
+  - camera_intrinsics
+  - camera2ego
+  - lidar2ego
+  - lidar2camera
+  - camera2lidar
+  - lidar2image
+  - img_aug_matrix
+  - lidar_aug_matrix
+  type: Collect3D
+use_dim: 5
+voxel_size:
+- 0.075
+- 0.075
+- 0.2
